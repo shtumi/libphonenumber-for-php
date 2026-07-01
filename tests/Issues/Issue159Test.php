@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace libphonenumber\Tests\Issues;
 
 use libphonenumber\PhoneNumber;
@@ -14,21 +16,21 @@ use PHPUnit\Framework\TestCase;
  */
 class Issue159Test extends TestCase
 {
-    const LOS_ANGELES_TZ = 'America/Los_Angeles';
+    public const LOS_ANGELES_TZ = 'America/Los_Angeles';
 
-    public function setUp()
+    public function setUp(): void
     {
         // Reset instance each time
         PhoneNumberUtil::resetInstance();
     }
 
-    public function testLookupTZ_LA()
+    public function testLookupTZ_LA(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(1)->setNationalNumber(2082924565);
+        $number->setCountryCode(1)->setNationalNumber('2082924565');
 
         $timeZoneMapper = PhoneNumberToTimeZonesMapper::getInstance();
 
-        $this->assertEquals(array(self::LOS_ANGELES_TZ), $timeZoneMapper->getTimeZonesForNumber($number));
+        self::assertSame([self::LOS_ANGELES_TZ], $timeZoneMapper->getTimeZonesForNumber($number));
     }
 }

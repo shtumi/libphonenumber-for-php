@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace libphonenumber\Tests\timezone;
 
 use libphonenumber\PhoneNumber;
@@ -9,28 +11,22 @@ use PHPUnit\Framework\TestCase;
 class PrefixTimeZonesMapTest extends TestCase
 {
     // US time zones
-    const CHICAGO_TZ = 'America/Chicago';
-    const DENVER_TZ = 'America/Denver';
-    const LOS_ANGELES_TZ = 'America/Los_Angeles';
-    const NEW_YORK_TZ = 'America/New_York';
+    public const CHICAGO_TZ = 'America/Chicago';
+    public const DENVER_TZ = 'America/Denver';
+    public const LOS_ANGELES_TZ = 'America/Los_Angeles';
+    public const NEW_YORK_TZ = 'America/New_York';
 
     // Russian time zones
-    const IRKUTSK_TZ = 'Asia/Irkutsk';
-    const MOSCOW_TZ = 'Europe/Moscow';
-    const VLADIVOSTOK_TZ = 'Asia/Vladivostok';
-    const YEKATERINBURG_TZ = 'Asia/Yekaterinburg';
-    /**
-     * @var PrefixTimeZonesMap
-     */
-    private static $prefixTimeZonesMapForUS;
-    /**
-     * @var PrefixTimeZonesMap
-     */
-    private static $prefixTimeZonesMapForRU;
+    public const IRKUTSK_TZ = 'Asia/Irkutsk';
+    public const MOSCOW_TZ = 'Europe/Moscow';
+    public const VLADIVOSTOK_TZ = 'Asia/Vladivostok';
+    public const YEKATERINBURG_TZ = 'Asia/Yekaterinburg';
+    private static PrefixTimeZonesMap $prefixTimeZonesMapForUS;
+    private static PrefixTimeZonesMap $prefixTimeZonesMapForRU;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
-        $sortedMapForUS = array();
+        $sortedMapForUS = [];
         $sortedMapForUS[1] = self::NEW_YORK_TZ . '&' . self::CHICAGO_TZ . '&' . self::LOS_ANGELES_TZ . '&' . self::DENVER_TZ;
         $sortedMapForUS[1201] = self::NEW_YORK_TZ;
         $sortedMapForUS[1205] = self::CHICAGO_TZ;
@@ -43,7 +39,7 @@ class PrefixTimeZonesMapTest extends TestCase
 
         self::$prefixTimeZonesMapForUS = new PrefixTimeZonesMap($sortedMapForUS);
 
-        $sortedMapForRU = array();
+        $sortedMapForRU = [];
         $sortedMapForRU[7421] = self::VLADIVOSTOK_TZ;
         $sortedMapForRU[7879] = self::MOSCOW_TZ;
         $sortedMapForRU[7342] = self::YEKATERINBURG_TZ;
@@ -52,73 +48,73 @@ class PrefixTimeZonesMapTest extends TestCase
         self::$prefixTimeZonesMapForRU = new PrefixTimeZonesMap($sortedMapForRU);
     }
 
-    public function testLookupTimeZonesForNumberCountryLevel_US()
+    public function testLookupTimeZonesForNumberCountryLevel_US(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(1)->setNationalNumber(1000000000);
+        $number->setCountryCode(1)->setNationalNumber('1000000000');
 
-        $this->assertEquals(
-            array(
+        self::assertSame(
+            [
                 self::NEW_YORK_TZ,
                 self::CHICAGO_TZ,
                 self::LOS_ANGELES_TZ,
                 self::DENVER_TZ,
-            ),
+            ],
             self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number)
         );
     }
 
-    public function testLookupTimeZonesForNumber_ValidNumber_Chicago()
+    public function testLookupTimeZonesForNumber_ValidNumber_Chicago(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(1)->setNationalNumber(2051235458);
+        $number->setCountryCode(1)->setNationalNumber('2051235458');
 
-        $this->assertEquals(array(self::CHICAGO_TZ), self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
+        self::assertSame([self::CHICAGO_TZ], self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
     }
 
-    public function testLookupTimeZonesForNumber_LA()
+    public function testLookupTimeZonesForNumber_LA(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(1)->setNationalNumber(2082924565);
+        $number->setCountryCode(1)->setNationalNumber('2082924565');
 
-        $this->assertEquals(array(self::LOS_ANGELES_TZ), self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
+        self::assertSame([self::LOS_ANGELES_TZ], self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
     }
 
-    public function testLookupTimeZonesForNumber_NY()
+    public function testLookupTimeZonesForNumber_NY(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(1)->setNationalNumber(2016641234);
+        $number->setCountryCode(1)->setNationalNumber('2016641234');
 
-        $this->assertEquals(array(self::NEW_YORK_TZ), self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
+        self::assertSame([self::NEW_YORK_TZ], self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
     }
 
-    public function testLookupTimeZonesForNumber_CH()
+    public function testLookupTimeZonesForNumber_CH(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(41)->setNationalNumber(446681300);
+        $number->setCountryCode(41)->setNationalNumber('446681300');
 
-        $this->assertEquals(array(), self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
+        self::assertSame([], self::$prefixTimeZonesMapForUS->lookupTimeZonesForNumber($number));
     }
 
-    public function testLookupTimeZonesForNumber_RU()
+    public function testLookupTimeZonesForNumber_RU(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(7)->setNationalNumber(87945154);
+        $number->setCountryCode(7)->setNationalNumber('87945154');
 
-        $this->assertEquals(array(self::MOSCOW_TZ), self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
+        self::assertSame([self::MOSCOW_TZ], self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
 
-        $number->setNationalNumber(421548578);
-        $this->assertEquals(array(self::VLADIVOSTOK_TZ), self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
+        $number->setNationalNumber('421548578');
+        self::assertSame([self::VLADIVOSTOK_TZ], self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
 
-        $number->setNationalNumber(342457897);
-        $this->assertEquals(array(self::YEKATERINBURG_TZ), self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
+        $number->setNationalNumber('342457897');
+        self::assertSame([self::YEKATERINBURG_TZ], self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
 
         // A mobile number
-        $number->setNationalNumber(9342457897);
-        $this->assertEquals(array(), self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
+        $number->setNationalNumber('9342457897');
+        self::assertSame([], self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
 
         // An invalid number (too short)
-        $number->setNationalNumber(3951);
-        $this->assertEquals(array(self::IRKUTSK_TZ), self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
+        $number->setNationalNumber('3951');
+        self::assertSame([self::IRKUTSK_TZ], self::$prefixTimeZonesMapForRU->lookupTimeZonesForNumber($number));
     }
 }

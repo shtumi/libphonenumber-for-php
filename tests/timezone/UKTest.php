@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace libphonenumber\Tests\timezone;
 
 use libphonenumber\PhoneNumber;
@@ -9,33 +11,33 @@ use PHPUnit\Framework\TestCase;
 
 class UKTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         PhoneNumberUtil::resetInstance();
     }
 
-    public function testGBNumber()
+    public function testGBNumber(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(44)->setNationalNumber(1614960000);
+        $number->setCountryCode(44)->setNationalNumber('1614960000');
 
         $timeZone = PhoneNumberToTimeZonesMapper::getInstance();
-        $this->assertEquals(array('Europe/London'), $timeZone->getTimeZonesForNumber($number));
+        self::assertSame(['Europe/London'], $timeZone->getTimeZonesForNumber($number));
     }
 
-    public function testNonGeocodableNumber()
+    public function testNonGeocodableNumber(): void
     {
         $number = new PhoneNumber();
-        $number->setCountryCode(44)->setNationalNumber(8001111);
+        $number->setCountryCode(44)->setNationalNumber('8001111');
 
         $timeZone = PhoneNumberToTimeZonesMapper::getInstance();
-        $this->assertEquals(
-            array(
+        self::assertSame(
+            [
                 'Europe/Guernsey',
                 'Europe/Isle_of_Man',
                 'Europe/Jersey',
-                'Europe/London'
-            ),
+                'Europe/London',
+            ],
             $timeZone->getTimeZonesForNumber($number)
         );
     }

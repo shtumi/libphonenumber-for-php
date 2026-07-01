@@ -1,49 +1,48 @@
 <?php
 
+declare(strict_types=1);
+
 namespace libphonenumber\Tests\Issues;
 
 use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use PHPUnit\Framework\TestCase;
 
 class CodeCoverageTest extends TestCase
 {
-    /**
-     * @var PhoneNumberUtil
-     */
-    private $phoneUtil;
+    private PhoneNumberUtil $phoneUtil;
 
-    public function setUp()
+    public function setUp(): void
     {
         PhoneNumberUtil::resetInstance();
         $this->phoneUtil = PhoneNumberUtil::getInstance();
     }
 
-    public function testNullException()
+    public function testTooShortNumber(): void
     {
-        try {
-            $this->phoneUtil->parse(null, null);
-        } catch (\Exception $e) {
-            if (!$e instanceof NumberParseException) {
-                throw $e;
-            }
-            $this->assertEquals("libphonenumber\\NumberParseException", \get_class($e));
-            $this->assertEquals('The phone number supplied was null.', $e->getMessage());
+        $this->expectException(NumberParseException::class);
+        $this->expectExceptionMessage('The string supplied is too short to be a phone number.');
+        $this->expectExceptionCode(3);
 
-            $this->assertEquals('Error type: 1. The phone number supplied was null.', (string)$e);
-        }
+        $this->phoneUtil->parse('+441', 'GB');
     }
 
-    public function testTooShortNumber()
+    public function testIsValidNumberForRegionWithManualPhoneNumber(): void
     {
-        try {
-            $this->phoneUtil->parse('+441', 'GB');
-        } catch (\Exception $e) {
-            $this->assertEquals("libphonenumber\\NumberParseException", \get_class($e));
-            $this->assertEquals('The string supplied is too short to be a phone number.', $e->getMessage());
-            $this->assertEquals(3, $e->getCode());
+        $number = new PhoneNumber();
+        $number->setNationalNumber('1234');
 
-            $this->assertEquals('Error type: 3. The string supplied is too short to be a phone number.', (string)$e);
-        }
+        self::assertFalse($this->phoneUtil->isValidNumberForRegion($number, 'GB'));
+    }
+
+    public function testFormatWithManualPhoneNumber(): void
+    {
+        $number = new PhoneNumber();
+        $number->setNationalNumber('1234');
+
+        self::assertEquals('1234', $this->phoneUtil->format($number, PhoneNumberFormat::E164));
+        self::assertEquals('1234', $this->phoneUtil->format($number, PhoneNumberFormat::NATIONAL));
     }
 }

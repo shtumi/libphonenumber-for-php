@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace libphonenumber\Tests\Issues;
 
 use libphonenumber\PhoneNumberType;
@@ -8,23 +10,20 @@ use PHPUnit\Framework\TestCase;
 
 class Issue14Test extends TestCase
 {
-    /**
-     * @var PhoneNumberUtil
-     */
-    private $phoneUtil;
+    private PhoneNumberUtil $phoneUtil;
 
-    public function setUp()
+    public function setUp(): void
     {
         PhoneNumberUtil::resetInstance();
         $this->phoneUtil = PhoneNumberUtil::getInstance();
     }
 
-    public function testKWMobileNumber()
+    public function testKWMobileNumber(): void
     {
         $number = '51440519';
         $phoneNumber = $this->phoneUtil->parse($number, 'KW');
 
-        $this->assertTrue($this->phoneUtil->isValidNumber($phoneNumber));
-        $this->assertEquals(PhoneNumberType::MOBILE, $this->phoneUtil->getNumberType($phoneNumber));
+        self::assertTrue($this->phoneUtil->isValidNumber($phoneNumber));
+        self::assertSame(PhoneNumberType::MOBILE, $this->phoneUtil->getNumberType($phoneNumber));
     }
 }

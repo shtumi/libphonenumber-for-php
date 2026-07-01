@@ -1,42 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace libphonenumber\Tests\Issues;
 
 use libphonenumber\geocoding\PhoneNumberOfflineGeocoder;
 use libphonenumber\PhoneNumber;
 use PHPUnit\Framework\TestCase;
 
+use function pack;
+
 class Issue106Test extends TestCase
 {
-    private static $TW_Number1;
-    /**
-     * @var PhoneNumberOfflineGeocoder
-     */
-    protected $geocoder;
+    private static PhoneNumber $TW_Number1;
+    protected PhoneNumberOfflineGeocoder $geocoder;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$TW_Number1 = new PhoneNumber();
-        self::$TW_Number1->setCountryCode(886)->setNationalNumber(223113731);
+        self::$TW_Number1->setCountryCode(886)->setNationalNumber('223113731');
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         PhoneNumberOfflineGeocoder::resetInstance();
         $this->geocoder = PhoneNumberOfflineGeocoder::getInstance();
     }
 
-    public function testGeocoderForZh()
+    public function testGeocoderForZh(): void
     {
-        $this->assertEquals('Taipei', $this->geocoder->getDescriptionForNumber(self::$TW_Number1, 'en'));
+        self::assertSame('Taipei', $this->geocoder->getDescriptionForNumber(self::$TW_Number1, 'en'));
 
-        $this->assertEquals(
-            \pack('H*', 'e58fb0') . \pack('H*', 'e58c97'),
+        self::assertSame(
+            pack('H*', 'e58fb0') . pack('H*', 'e58c97'),
             $this->geocoder->getDescriptionForNumber(self::$TW_Number1, 'zh_CN')
         );
 
-        $this->assertEquals(
-            \pack('H*', 'e887ba') . \pack('H*', 'e58c97'),
+        self::assertSame(
+            pack('H*', 'e887ba') . pack('H*', 'e58c97'),
             $this->geocoder->getDescriptionForNumber(self::$TW_Number1, 'zh_TW')
         );
     }

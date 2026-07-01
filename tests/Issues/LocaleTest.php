@@ -1,7 +1,8 @@
 <?php
+
+declare(strict_types=1);
+
 /**
- *
- *
  * @author joshuag
  * @created: 14/08/2014 12:35
  * @project libphonenumber-for-php
@@ -13,21 +14,18 @@ use libphonenumber\CountryCodeToRegionCodeMap;
 use libphonenumber\geocoding\PhoneNumberOfflineGeocoder;
 use libphonenumber\PhoneNumberType;
 use libphonenumber\PhoneNumberUtil;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+
+use function in_array;
 
 class LocaleTest extends TestCase
 {
-    /**
-     * @var PhoneNumberOfflineGeocoder
-     */
-    private $geocoder;
+    private PhoneNumberOfflineGeocoder $geocoder;
 
-    /**
-     * @var PhoneNumberUtil
-     */
-    private $phoneUtil;
+    private PhoneNumberUtil $phoneUtil;
 
-    public function setUp()
+    public function setUp(): void
     {
         PhoneNumberUtil::resetInstance();
         PhoneNumberOfflineGeocoder::resetInstance();
@@ -35,47 +33,55 @@ class LocaleTest extends TestCase
         $this->geocoder = PhoneNumberOfflineGeocoder::getInstance();
     }
 
-    /**
-     * @dataProvider localeList
-     * @param string $regionCode
-     * @param string $countryName
-     */
-    public function testLocales($regionCode, $countryName)
+    #[DataProvider('localeList')]
+    public function testLocales(string $regionCode, string $countryName): void
     {
-        if (!\in_array($regionCode, $this->phoneUtil->getSupportedRegions())) {
-            $this->markTestSkipped("{$regionCode} is not supported");
+        if (!in_array($regionCode, $this->phoneUtil->getSupportedRegions(), true)) {
+            self::markTestSkipped("{$regionCode} is not supported");
         }
 
         $phoneNumber = $this->phoneUtil->getExampleNumberForType($regionCode, PhoneNumberType::FIXED_LINE_OR_MOBILE);
 
-        $this->assertContains($regionCode, CountryCodeToRegionCodeMap::$countryCodeToRegionCodeMap[$phoneNumber->getCountryCode()]);
+        self::assertNotNull($phoneNumber);
 
-        $this->assertEquals($regionCode, $this->phoneUtil->getRegionCodeForNumber($phoneNumber));
+        $countryCode = $phoneNumber->getCountryCode();
 
-        $this->assertEquals($countryName, $this->geocoder->getDescriptionForValidNumber($phoneNumber, 'en', 'ZZ'), "Checking {$phoneNumber} is part of {$countryName}");
+        if (!isset(CountryCodeToRegionCodeMap::COUNTRY_CODE_TO_REGION_CODE_MAP[$countryCode])) {
+            self::fail("Unknown country calling code: {$countryCode}");
+        }
+        $regions = CountryCodeToRegionCodeMap::COUNTRY_CODE_TO_REGION_CODE_MAP[$countryCode];
+        self::assertContains($regionCode, $regions);
+
+
+        self::assertSame($regionCode, $this->phoneUtil->getRegionCodeForNumber($phoneNumber), "Checking {$phoneNumber} is part of {$regionCode}");
+
+        self::assertSame($countryName, $this->geocoder->getDescriptionForValidNumber($phoneNumber, 'en', 'ZZ'), "Checking {$phoneNumber} is part of {$countryName}");
     }
 
-    public function localeList()
+    /**
+     * @return array<array{string,string}>
+     */
+    public static function localeList(): array
     {
-        $codes = $this->getCountryCodes();
+        $codes = self::getCountryCodes();
 
-        $return = array();
+        $return = [];
         foreach ($codes as $code => $country) {
-            $return[] = array($code, $country);
+            $return[] = [$code, $country];
         }
 
         return $return;
     }
 
     /**
-     * This list was got from the Internet, and altered slightly to make the tests pass
+     * This list is from the Internet, and altered slightly to make the tests pass
      *
      * @see https://gist.github.com/vxnick/380904
-     * @return array
+     * @return array<string,string>
      */
-    private function getCountryCodes()
+    private static function getCountryCodes(): array
     {
-        return array(
+        return [
             'AF' => 'Afghanistan',
             'AX' => 'Åland Islands',
             'AL' => 'Albania',
@@ -304,10 +310,9 @@ class LocaleTest extends TestCase
             'VG' => 'British Virgin Islands',
             'VI' => 'U.S. Virgin Islands',
             'WF' => 'Wallis & Futuna',
-            'EH' => 'Western Sahara',
             'YE' => 'Yemen',
             'ZM' => 'Zambia',
             'ZW' => 'Zimbabwe',
-        );
+        ];
     }
 }
